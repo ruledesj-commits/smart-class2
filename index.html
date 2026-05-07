@@ -41,9 +41,9 @@
 
     <div id="sec-login" class="section active">
         <p style="text-align: center; color: #636e72;">교사 로그인</p>
-        <input type="text" id="t-name" class="input-field" placeholder="성함 (예: 김00)"> [cite: 2]
-        <input type="password" id="t-pw" class="input-field" placeholder="비밀번호 (0000)"> [cite: 3]
-        <button class="btn-blue" onclick="goSetup()">로그인</button> [cite: 1]
+        <input type="text" id="t-name" class="input-field" placeholder="성함 (예: 김00)"> 
+        <input type="password" id="t-pw" class="input-field" placeholder="비밀번호 (0000)"> 
+        <button class="btn-blue" onclick="goSetup()">로그인</button>
     </div>
 
     <div id="sec-setup" class="section">
@@ -56,16 +56,16 @@
         <p id="welcome-msg" style="text-align:center; font-weight:bold;"></p>
         <div class="menu-grid">
             <div class="menu-item" onclick="showSubPage('칭찬 스티커')">
-                <span class="icon">🏷️</span> <span class="menu-label">칭찬스티커</span> [cite: 13]
+                <span class="icon">🏷️</span> <span class="menu-label">칭찬스티커</span> 
             </div>
             <div class="menu-item" onclick="showSubPage('독서 기록')">
-                <span class="icon">📚</span> <span class="menu-label">독서기록</span> [cite: 14]
+                <span class="icon">📚</span> <span class="menu-label">독서기록</span> 
             </div>
             <div class="menu-item" onclick="showSubPage('일기 기록')">
-                <span class="icon">📝</span> <span class="menu-label">일기기록</span> [cite: 15]
+                <span class="icon">📝</span> <span class="menu-label">일기기록</span> 
             </div>
             <div class="menu-item" onclick="showSubPage('우리반 스티커')">
-                <span class="icon">🏆</span> <span class="menu-label">우리반스티커</span> [cite: 16]
+                <span class="icon">🏆</span> <span class="menu-label">우리반스티커</span> 
             </div>
         </div>
         <button class="btn-blue" style="background:#b2bec3; margin-top:30px;" onclick="location.reload()">로그아웃</button>
@@ -90,7 +90,7 @@
                 <span class="num-box">${i}</span>
                 <input type="text" class="input-field name-in" id="name-${i}" style="margin:2px 0;" placeholder="이름 입력">
             </div>
-        `; [cite: 10, 12]
+        `;
     }
 
     function goSetup() {
