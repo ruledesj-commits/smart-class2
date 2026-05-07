@@ -8,30 +8,19 @@
         body { font-family: 'Malgun Gothic', sans-serif; background: #f8f9fa; margin: 0; padding: 10px; display: flex; justify-content: center; }
         .app-container { width: 100%; max-width: 450px; background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-height: 90vh; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
         h1 { text-align: center; color: #2d3436; font-size: 22px; margin-bottom: 20px; }
-        
-        /* 공통 버튼 및 입력창 */
         .btn-blue { width: 100%; padding: 15px; background: #0984e3; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .input-field { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; }
-
-        /* 섹션 제어 */
         .section { display: none; }
         .active { display: block; }
-
-        /* 메인 메뉴 그리드 (아이콘 4개) */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .menu-item { background: #f1f2f6; padding: 30px 10px; border-radius: 20px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .menu-item:active { background: #dfe4ea; transform: scale(0.95); }
+        .menu-item { background: #f1f2f6; padding: 30px 10px; border-radius: 20px; text-align: center; cursor: pointer; }
         .icon { font-size: 35px; display: block; margin-bottom: 10px; }
-        .menu-label { font-weight: bold; font-size: 14px; color: #2f3542; }
-
-        /* 명부 작성 스크롤 */
+        .menu-label { font-weight: bold; font-size: 14px; }
         .scroll-list { max-height: 350px; overflow-y: auto; border: 1px solid #f1f2f6; padding: 10px; border-radius: 10px; }
         .roster-row { display: flex; align-items: center; margin-bottom: 5px; }
         .num-box { width: 30px; font-size: 14px; color: #a4b0be; }
-
-        /* 리스트 화면 */
         .record-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f1f2f6; }
-        .back-btn { background: #636e72; color: white; padding: 8px 15px; border-radius: 8px; border: none; margin-bottom: 15px; cursor: pointer; }
+        .back-btn { background: #636e72; color: white; padding: 8px 15px; border-radius: 8px; border: none; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -40,32 +29,33 @@
     <h1>🌱 슬기로운 기록생활</h1>
 
     <div id="sec-login" class="section active">
-        <p style="text-align: center; color: #636e72;">교사 로그인</p>
-        <input type="text" id="t-name" class="input-field" placeholder="성함 (예: 김00)"> 
-        <input type="password" id="t-pw" class="input-field" placeholder="비밀번호 (0000)"> 
-        <button class="btn-blue" onclick="goSetup()">로그인</button>
+        <p style="text-align: center; color: #636e72;">학급 관리 로그인</p>
+        <input type="text" id="c-name" class="input-field" placeholder="학급 이름 (예: 2학년1반)">
+        <input type="password" id="c-pw" class="input-field" placeholder="비밀번호 (자유롭게 입력)">
+        <button class="btn-blue" onclick="handleLogin()">시작하기</button>
     </div>
 
     <div id="sec-setup" class="section">
-        <h3>학생 명부 작성 (총 30명)</h3> 
+        <h3>우리 반 명부 작성 (최대 30명)</h3>
+        <p style="font-size:12px; color:#636e72;">이름을 입력한 학생만 메뉴에 나타납니다.</p>
         <div class="scroll-list" id="roster-inputs"></div>
         <button class="btn-blue" onclick="saveAndGoMain()">명부 저장 및 시작</button>
     </div>
 
     <div id="sec-main" class="section">
-        <p id="welcome-msg" style="text-align:center; font-weight:bold;"></p>
+        <p id="welcome-msg" style="text-align:center; font-weight:bold; font-size:18px;"></p>
         <div class="menu-grid">
             <div class="menu-item" onclick="showSubPage('칭찬 스티커')">
-                <span class="icon">🏷️</span> <span class="menu-label">칭찬스티커</span> 
+                <span class="icon">🏷️</span> <span class="menu-label">칭찬스티커</span>
             </div>
             <div class="menu-item" onclick="showSubPage('독서 기록')">
-                <span class="icon">📚</span> <span class="menu-label">독서기록</span> 
+                <span class="icon">📚</span> <span class="menu-label">독서기록</span>
             </div>
             <div class="menu-item" onclick="showSubPage('일기 기록')">
-                <span class="icon">📝</span> <span class="menu-label">일기기록</span> 
+                <span class="icon">📝</span> <span class="menu-label">일기기록</span>
             </div>
             <div class="menu-item" onclick="showSubPage('우리반 스티커')">
-                <span class="icon">🏆</span> <span class="menu-label">우리반스티커</span> 
+                <span class="icon">🏆</span> <span class="menu-label">우리반스티커</span>
             </div>
         </div>
         <button class="btn-blue" style="background:#b2bec3; margin-top:30px;" onclick="location.reload()">로그아웃</button>
@@ -74,35 +64,66 @@
     <div id="sec-sub" class="section">
         <button class="back-btn" onclick="goBack()">← 뒤로가기</button>
         <h3 id="sub-title">메뉴 이름</h3>
-        <div id="student-display-list">
-            </div>
+        <div id="student-display-list"></div>
     </div>
 </div>
 
 <script>
     let currentRoster = [];
 
-    // 30명 입력칸 초기 생성
     const rosterDiv = document.getElementById('roster-inputs');
     for(let i=1; i<=30; i++) {
         rosterDiv.innerHTML += `
             <div class="roster-row">
                 <span class="num-box">${i}</span>
-                <input type="text" class="input-field name-in" id="name-${i}" style="margin:2px 0;" placeholder="이름 입력">
+                <input type="text" class="input-field" id="name-${i}" style="margin:2px 0;" placeholder="학생 이름">
             </div>
         `;
     }
 
-    function goSetup() {
-        const name = document.getElementById('t-name').value;
-        const pw = document.getElementById('t-pw').value;
-        if(name && pw === "0000") {
-            document.getElementById('welcome-msg').innerText = name + " 선생님 반";
+    function handleLogin() {
+        const className = document.getElementById('c-name').value.trim();
+        const pw = document.getElementById('c-pw').value.trim();
+
+        if(!className || !pw) {
+            alert("학급 이름과 비밀번호를 모두 입력해주세요.");
+            return;
+        }
+
+        let db = JSON.parse(localStorage.getItem('classAppDB')) || {};
+
+        if(!db[className]) {
+            // [최초 방문/가입] 학급 저장
+            db[className] = { password: pw, roster: [] };
+            localStorage.setItem('classAppDB', JSON.stringify(db));
+            alert(className + " 정보가 새로 등록되었습니다.");
+            enterMain(className, []);
+        } else {
+            // [재방문/로그인] 중복 확인 및 비번 대조
+            if(db[className].password === pw) {
+                alert("정상적으로 로그인되었습니다.");
+                enterMain(className, db[className].roster);
+            } else {
+                alert("이미 존재하는 학급 이름입니다. 다른 이름을 사용하시거나 비밀번호를 확인해주세요.");
+            }
+        }
+    }
+
+    function enterMain(className, roster) {
+        document.getElementById('welcome-msg').innerText = "✨ " + className;
+        currentRoster = roster;
+        
+        if(currentRoster.length === 0) {
             changeSection('sec-setup');
-        } else { alert("이름과 비번(0000)을 확인하세요."); }
+        } else {
+            changeSection('sec-main');
+        }
     }
 
     function saveAndGoMain() {
+        const className = document.getElementById('c-name').value.trim();
+        let db = JSON.parse(localStorage.getItem('classAppDB'));
+        
         currentRoster = [];
         for(let i=1; i<=30; i++) {
             const val = document.getElementById(`name-${i}`).value.trim();
@@ -111,10 +132,12 @@
         
         if(currentRoster.length === 0) {
             alert("최소 한 명의 이름은 입력해야 합니다.");
-        } else {
-            localStorage.setItem('roster', JSON.stringify(currentRoster));
-            changeSection('sec-main');
+            return;
         }
+
+        db[className].roster = currentRoster;
+        localStorage.setItem('classAppDB', JSON.stringify(db));
+        changeSection('sec-main');
     }
 
     function showSubPage(title) {
@@ -122,12 +145,11 @@
         const listDiv = document.getElementById('student-display-list');
         listDiv.innerHTML = "";
 
-        // 핵심: 저장된 명수만큼만 반복문(forEach)을 돌려 화면을 만듦
         currentRoster.forEach(std => {
             listDiv.innerHTML += `
                 <div class="record-row">
                     <span><b>${std.num}.</b> ${std.name}</span>
-                    <button style="border:none; background:#eee; padding:5px 10px; border-radius:5px;">기록하기</button>
+                    <button style="border:none; background:#eee; padding:5px 10px; border-radius:5px;">기록</button>
                 </div>
             `;
         });
