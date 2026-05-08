@@ -244,24 +244,72 @@
         renderReadingTool(idx, document.getElementById('detail-interface'));
     }
 
-    function renderDiaryTool(idx, container) {
-        const std = currentRoster[idx];
-        container.innerHTML = `
-            <div style="margin-bottom:20px;">
-                <input type="text" id="diary-date-in" class="input-field" placeholder="날짜 입력 (예: 3/4)">
-                <button class="btn-blue" onclick="addDiaryDate(${idx})">기록 추가</button>
+   function renderDiaryTool(idx, container) {
+    const std = currentRoster[idx];
+    // 최대 50칸 (5열 10행) 그리드 생성
+    container.innerHTML = `
+        <div style="margin-bottom:15px; display:flex; gap:5px;">
+            <input type="text" id="diary-date-in" class="input-field" placeholder="날짜 입력 (예: 3/10)" style="flex:1;">
+            <button class="btn-blue" onclick="addDiaryDate(${idx})" style="width:80px;">추가</button>
+        </div>
+        <div style="background:#fff; border:1px solid #dfe6e9; border-radius:10px; padding:10px;">
+            <div id="diary-grid" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:5px;">
+                <!-- 날짜 칸이 여기에 생성됩니다 -->
             </div>
-            <strong>제출 이력:</strong>
-            <div class="diary-log-area">${std.diaryDates.join(', ') || "제출 기록이 없습니다."}</div>`;
+        </div>
+        <p style="font-size:12px; color:#636e72; margin-top:10px; text-align:right;">총 ${std.diaryDates.length}회 기록됨</p>
+    `;
+
+    const grid = document.getElementById('diary-grid');
+    // 50개의 칸을 순회하며 입력된 날짜를 채웁니다.
+    for (let i = 0; i < 50; i++) {
+        const cell = document.createElement('div');
+        cell.style.cssText = `
+            aspect-ratio: 1.5 / 1;
+            border: 1px solid #f1f2f6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            background: ${std.diaryDates[i] ? '#e1f5fe' : '#fff'};
+            color: ${std.diaryDates[i] ? '#0288d1' : '#dfe6e9'};
+            font-weight: ${std.diaryDates[i] ? 'bold' : 'normal'};
+        `;
+        
+        // 데이터가 있으면 날짜 표시, 없으면 칸 번호(희미하게) 표시
+        cell.innerText = std.diaryDates[i] ? std.diaryDates[i] : (i + 1);
+        
+        // 날짜 클릭 시 삭제 기능 (오입력 대비)
+        if(std.diaryDates[i]) {
+            cell.onclick = async () => {
+                if(confirm(`'${std.diaryDates[i]}' 기록을 삭제할까요?`)) {
+                    std.diaryDates.splice(i, 1);
+                    await saveDB();
+                    renderDiaryTool(idx, container);
+                }
+            };
+        }
+        grid.appendChild(cell);
+    }
+}
+
+async function addDiaryDate(idx) {
+    const dateIn = document.getElementById('diary-date-in');
+    const date = dateIn.value.trim();
+    if(!date) return;
+    
+    // 최대 50개까지만 저장 가능하도록 제한
+    if(currentRoster[idx].diaryDates.length >= 50) {
+        return alert("최대 50회까지만 기록할 수 있습니다.");
     }
 
-    async function addDiaryDate(idx) {
-        const date = document.getElementById('diary-date-in').value.trim();
-        if(!date) return;
-        currentRoster[idx].diaryDates.push(date);
-        await saveDB();
-        renderDiaryTool(idx, document.getElementById('detail-interface'));
-    }
+    currentRoster[idx].diaryDates.push(date);
+    await saveDB(); // 파이어베이스 실시간 저장
+    renderDiaryTool(idx, document.getElementById('detail-interface'));
+    dateIn.value = ""; // 입력창 초기화
+    dateIn.focus();
+}
 
     function renderClassStickerPage(container) {
         let score = classData.classStickers || 0;
