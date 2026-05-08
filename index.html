@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>슬기로운 기록생활</title>
+    <title>슬기로운 기록생활 (Cloud)</title>
     <style>
+        /* 스타일 부분은 선생님의 기존 예쁜 디자인과 동일합니다 */
         body { font-family: 'Malgun Gothic', sans-serif; background: #f8f9fa; margin: 0; padding: 10px; display: flex; justify-content: center; }
         .app-container { width: 100%; max-width: 450px; background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-height: 95vh; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
         h1 { text-align: center; color: #2d3436; font-size: 22px; margin-bottom: 10px; }
@@ -19,16 +20,12 @@
         .scroll-list { max-height: 450px; overflow-y: auto; border: 1px solid #f1f2f6; padding: 10px; border-radius: 10px; }
         .record-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f1f2f6; cursor: pointer; }
         .back-btn { background: #636e72; color: white; padding: 8px 15px; border-radius: 8px; border: none; margin-bottom: 15px; cursor: pointer; }
-        
-        /* 기록 도구 스타일 */
         .sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 10px; }
         .sticker-cell { aspect-ratio: 1; border: 1px solid #dfe6e9; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #dfe6e9; cursor: pointer; }
         .sticker-cell.on { background-color: #ffeaa7; border-color: #fdcb6e; color: transparent; }
         .sticker-cell.on::after { content: '⭐'; font-size: 16px; }
-        
         .reading-display { font-size: 24px; font-weight: bold; color: #0984e3; text-align: center; margin: 20px 0; }
         .diary-log-area { background: #f1f2f6; padding: 15px; border-radius: 10px; min-height: 100px; margin-top: 10px; line-height: 1.6; }
-        
         .class-goal-bar { display: flex; border: 2px solid #ddd; border-radius: 10px; overflow: hidden; height: 40px; margin: 20px 0; background: #eee; }
         .goal-cell { flex: 1; border-right: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999; }
         .goal-cell.filled { background-color: #f1c40f; color: white; font-weight: bold; }
@@ -41,19 +38,22 @@
 <div class="app-container">
     <h1>🌱 슬기로운 기록생활</h1>
 
+    <!-- 1. 로그인 -->
     <div id="sec-login" class="section active">
-        <p style="text-align: center; color: #636e72;">학급 관리 로그인</p>
-        <input type="text" id="c-name" class="input-field" placeholder="학급 이름 (예: 2학년1반)">
+        <p style="text-align: center; color: #636e72;">학급 관리 로그인 (Cloud)</p>
+        <input type="text" id="c-name" class="input-field" placeholder="학급 이름 (예: 조준호)">
         <input type="password" id="c-pw" class="input-field" placeholder="비밀번호">
         <button class="btn-blue" onclick="handleLogin()">시작하기</button>
     </div>
 
+    <!-- 2. 명부 작성 -->
     <div id="sec-setup" class="section">
         <h3>우리 반 명부 작성 (최대 30명)</h3>
         <div class="scroll-list" id="roster-inputs"></div>
         <button class="btn-blue" onclick="saveAndGoMain()">명부 저장 및 시작</button>
     </div>
 
+    <!-- 3. 메인 메뉴 -->
     <div id="sec-main" class="section">
         <p id="welcome-msg" style="text-align:center; font-weight:bold; font-size:18px;"></p>
         <div class="menu-grid">
@@ -73,12 +73,14 @@
         <button class="btn-blue" style="background:#b2bec3; margin-top:30px;" onclick="location.reload()">로그아웃</button>
     </div>
 
+    <!-- 4. 하위 목록 섹션 -->
     <div id="sec-sub" class="section">
         <button class="back-btn" onclick="goBack()">← 뒤로가기</button>
         <h3 id="sub-title">메뉴 이름</h3>
         <div id="student-display-list" class="scroll-list"></div>
     </div>
 
+    <!-- 5. 상세 기록 섹션 -->
     <div id="sec-detail" class="section">
         <button class="back-btn" onclick="changeSection('sec-sub')">← 목록으로</button>
         <h2 id="detail-student-name">학생 이름</h2>
@@ -86,29 +88,57 @@
     </div>
 </div>
 
+<!-- 파이어베이스 라이브러리 추가 -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
 <script>
+    // 선생님의 고유 설정값
+    const firebaseConfig = {
+        apiKey: "AIzaSyBKVYFPnLoBZ9bKjjE1SfJXBQKiV4fssj4",
+        authDomain: "smart-class2-record.firebaseapp.com",
+        projectId: "smart-class2-record",
+        storageBucket: "smart-class2-record.firebasestorage.app",
+        messagingSenderId: "479464373449",
+        appId: "1:479464373449:web:790a0def84c615f4396118"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const fs = firebase.firestore();
+
     let currentClassName = "";
     let currentRoster = [];
-    let db = JSON.parse(localStorage.getItem('classAppDB')) || {};
+    let classData = {};
 
-    // 명부 입력칸 생성
+    // 명부 입력칸 초기 생성
     const rosterDiv = document.getElementById('roster-inputs');
     for(let i=1; i<=30; i++) {
         rosterDiv.innerHTML += `<div class="roster-row"><span class="num-box">${i}</span><input type="text" class="input-field" id="name-${i}" style="margin:2px 0;" placeholder="학생 이름"></div>`;
     }
 
-    function handleLogin() {
+    // 클라우드 로그인
+    async function handleLogin() {
         const className = document.getElementById('c-name').value.trim();
         const pw = document.getElementById('c-pw').value.trim();
         if(!className || !pw) return alert("학급 이름과 비밀번호를 입력해주세요.");
 
-        if(!db[className]) {
-            db[className] = { password: pw, roster: [], classStickers: 0, rewardText: "5개 완성 시 교실 놀이\n10개 완성 시 영화 감상" };
-            saveDB();
-            enterMain(className, []);
+        const docRef = fs.collection("classes").doc(className);
+        const docSnap = await docRef.get();
+
+        if (!docSnap.exists()) {
+            if(confirm(`'${className}' 학급이 없습니다. 새로 만드시겠습니까?`)) {
+                classData = { password: pw, roster: [], classStickers: 0, rewardText: "보상을 입력하세요" };
+                await docRef.set(classData);
+                enterMain(className, []);
+            }
         } else {
-            if(db[className].password === pw) enterMain(className, db[className].roster);
-            else alert("비밀번호가 틀립니다.");
+            const data = docSnap.data();
+            if(data.password === pw) {
+                classData = data;
+                enterMain(className, data.roster);
+            } else {
+                alert("비밀번호가 틀립니다.");
+            }
         }
     }
 
@@ -119,24 +149,28 @@
         changeSection(currentRoster.length === 0 ? 'sec-setup' : 'sec-main');
     }
 
-    function saveAndGoMain() {
+    async function saveAndGoMain() {
         currentRoster = [];
         for(let i=1; i<=30; i++) {
             const name = document.getElementById(`name-${i}`).value.trim();
             if(name) {
-                // 각 학생의 초기 데이터 구조
                 currentRoster.push({
-                    num: i,
-                    name: name,
-                    stickers: new Array(30).fill(false),
-                    readingCount: 0,
-                    diaryDates: []
+                    num: i, name: name, stickers: new Array(30).fill(false),
+                    readingCount: 0, diaryDates: []
                 });
             }
         }
-        db[currentClassName].roster = currentRoster;
-        saveDB();
+        await saveDB();
         changeSection('sec-main');
+    }
+
+    // 데이터 저장 (Cloud 전송)
+    async function saveDB() {
+        await fs.collection("classes").doc(currentClassName).update({
+            roster: currentRoster,
+            classStickers: classData.classStickers || 0,
+            rewardText: classData.rewardText || ""
+        });
     }
 
     function showSubPage(title) {
@@ -176,7 +210,6 @@
         changeSection('sec-detail');
     }
 
-    // [기능 1] 개인 스티커 판
     function renderPersonalStickers(idx, container) {
         const std = currentRoster[idx];
         container.innerHTML = `<p>현재 스티커: <b>${std.stickers.filter(s => s).length}</b> / 30</p><div class="sticker-grid" id="st-grid"></div>`;
@@ -185,16 +218,15 @@
             const cell = document.createElement('div');
             cell.className = 'sticker-cell' + (on ? ' on' : '');
             cell.innerText = sIdx + 1;
-            cell.onclick = () => {
+            cell.onclick = async () => {
                 std.stickers[sIdx] = !std.stickers[sIdx];
-                saveDB();
+                await saveDB();
                 renderPersonalStickers(idx, container);
             };
             grid.appendChild(cell);
         });
     }
 
-    // [기능 2] 독서 권수 누적
     function renderReadingTool(idx, container) {
         const std = currentRoster[idx];
         container.innerHTML = `
@@ -205,13 +237,12 @@
             </div>`;
     }
 
-    function updateReading(idx, val) {
+    async function updateReading(idx, val) {
         currentRoster[idx].readingCount = Math.max(0, currentRoster[idx].readingCount + val);
-        saveDB();
+        await saveDB();
         renderReadingTool(idx, document.getElementById('detail-interface'));
     }
 
-    // [기능 3] 일기 날짜 기록
     function renderDiaryTool(idx, container) {
         const std = currentRoster[idx];
         container.innerHTML = `
@@ -220,33 +251,23 @@
                 <button class="btn-blue" onclick="addDiaryDate(${idx})">기록 추가</button>
             </div>
             <strong>제출 이력:</strong>
-            <div class="diary-log-area">${std.diaryDates.join(', ') || "제출 기록이 없습니다."}</div>
-            <button class="btn-blue" style="background:#b2bec3; font-size:12px; margin-top:10px;" onclick="resetDiary(${idx})">기록 초기화</button>`;
+            <div class="diary-log-area">${std.diaryDates.join(', ') || "제출 기록이 없습니다."}</div>`;
     }
 
-    function addDiaryDate(idx) {
+    async function addDiaryDate(idx) {
         const date = document.getElementById('diary-date-in').value.trim();
         if(!date) return;
         currentRoster[idx].diaryDates.push(date);
-        saveDB();
+        await saveDB();
         renderDiaryTool(idx, document.getElementById('detail-interface'));
     }
 
-    function resetDiary(idx) {
-        if(confirm("정말 초기화할까요?")) {
-            currentRoster[idx].diaryDates = [];
-            saveDB();
-            renderDiaryTool(idx, document.getElementById('detail-interface'));
-        }
-    }
-
-    // [기능 4] 학급 전체 보상 (막대그래프)
     function renderClassStickerPage(container) {
-        let score = db[currentClassName].classStickers || 0;
+        let score = classData.classStickers || 0;
         container.innerHTML = `
             <div class="reward-box">
-                <span style="font-weight:bold; color:#0984e3;">🏆 보상 기준 (수정 가능)</span>
-                <textarea class="reward-input" rows="3" onblur="db[currentClassName].rewardText=this.value; saveDB();">${db[currentClassName].rewardText}</textarea>
+                <span style="font-weight:bold; color:#0984e3;">🏆 보상 기준 (수정 시 자동저장)</span>
+                <textarea id="reward-ta" class="reward-input" rows="3">${classData.rewardText}</textarea>
             </div>
             <div class="class-goal-bar" id="goal-bar"></div>
             <div style="text-align:center;">
@@ -256,21 +277,22 @@
                     <button class="btn-blue" style="background:#e74c3c" onclick="updateClassScore(-1)">- 1점</button>
                 </div>
             </div>`;
+        
+        document.getElementById('reward-ta').onblur = async (e) => {
+            classData.rewardText = e.target.value;
+            await saveDB();
+        };
+
         const bar = document.getElementById('goal-bar');
         for(let i=1; i<=30; i++) {
             bar.innerHTML += `<div class="goal-cell ${i <= score ? 'filled' : ''}">${i%5==0?i:''}</div>`;
         }
     }
 
-    function updateClassScore(val) {
-        db[currentClassName].classStickers = Math.max(0, Math.min(30, (db[currentClassName].classStickers || 0) + val));
-        saveDB();
+    async function updateClassScore(val) {
+        classData.classStickers = Math.max(0, Math.min(30, (classData.classStickers || 0) + val));
+        await saveDB();
         renderClassStickerPage(document.getElementById('student-display-list'));
-    }
-
-    function saveDB() {
-        db[currentClassName].roster = currentRoster;
-        localStorage.setItem('classAppDB', JSON.stringify(db));
     }
 
     function changeSection(id) {
