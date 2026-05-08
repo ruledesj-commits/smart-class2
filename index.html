@@ -1,3 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART 학급수첩 (Cloud)</title>
+    <style>
+        /* 1. 기본 레이아웃 스타일 */
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: #e3f2fd; 
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); 
+            padding: 20px;
+            min-height: 90vh;
+        }
+
+        /* 2. 공통 요소 스타일 */
+        .btn-blue { width: 100%; padding: 12px; background: #0984e3; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .input-field { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; }
+        .section { display: none; }
+        .active { display: block; }
+        
+        /* 3. 메뉴 및 목록 스타일 */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-item { background: #f1f2f6; padding: 20px 10px; border-radius: 20px; text-align: center; cursor: pointer; }
+        .menu-label { font-weight: bold; font-size: 14px; margin-top: 10px; color: #2d3436; }
+        .scroll-list { max-height: 450px; overflow-y: auto; border: 1px solid #f1f2f6; padding: 10px; border-radius: 10px; background: #fff; }
+        .record-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f1f2f6; cursor: pointer; }
+        .back-btn { background: #636e72; color: white; padding: 8px 15px; border-radius: 8px; border: none; margin-bottom: 15px; cursor: pointer; }
+
+        /* 4. 기록 도구 전용 스타일 */
+        .sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 10px; }
+        .sticker-cell { aspect-ratio: 1; border: 1px solid #dfe6e9; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #dfe6e9; cursor: pointer; }
+        .sticker-cell.on { background-color: #ffeaa7; border-color: #fdcb6e; color: transparent; }
+        .sticker-cell.on::after { content: '⭐'; font-size: 16px; }
+        .reading-display { font-size: 24px; font-weight: bold; color: #0984e3; text-align: center; margin: 20px 0; }
+        .class-goal-bar { display: flex; border: 2px solid #ddd; border-radius: 10px; overflow: hidden; height: 40px; margin: 20px 0; background: #eee; }
+        .goal-cell { flex: 1; border-right: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999; }
+        .goal-cell.filled { background-color: #f1c40f; color: white; font-weight: bold; }
+        .reward-box { background: #f9f9f9; padding: 15px; border-radius: 15px; border: 1px dashed #0984e3; margin-bottom: 20px; }
+        .reward-input { width: 100%; border: none; background: transparent; font-size: 14px; resize: none; outline: none; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
 <body>
 
 <div class="app-container">
@@ -7,7 +62,7 @@
         <p style="color: #636e72; font-size: 14px; margin-top: 10px;">2학년 1반 아이들의 소중한 기록</p>
     </div>
 
-    <!-- 1. 로그인 -->
+    <!-- 1. 로그인 섹션 -->
     <div id="sec-login" class="section active">
         <p style="text-align: center; color: #636e72;">학급 관리 로그인 (Cloud)</p>
         <input type="text" id="c-name" class="input-field" placeholder="학급 이름 (예: 조준호)">
@@ -15,58 +70,53 @@
         <button class="btn-blue" onclick="handleLogin()">시작하기</button>
     </div>
 
-    <!-- 2. 명부 작성 -->
+    <!-- 2. 명부 작성 섹션 -->
     <div id="sec-setup" class="section">
-        <h3>우리 반 명부 작성 (최대 30명)</h3>
-        <div class="scroll-list" id="roster-inputs"></div>
+        <h3 style="text-align: center;">우리 반 명단 만들기</h3>
+        <div class="scroll-list" id="roster-inputs" style="margin-bottom: 15px;"></div>
         <button class="btn-blue" onclick="saveAndGoMain()">명부 저장 및 시작</button>
     </div>
 
-    <!-- 3. 메인 메뉴 -->
+    <!-- 3. 메인 메뉴 섹션 -->
     <div id="sec-main" class="section">
-        <p id="welcome-msg" style="text-align:center; font-weight:bold; font-size:18px;"></p>
+        <p id="welcome-msg" style="text-align:center; font-weight:bold; font-size:18px; color: #0984e3;"></p>
         <div class="menu-grid">
             <div class="menu-item" onclick="showSubPage('칭찬 스티커')">
-                <img src="images/sticker.png" style="width: 100%; max-width: 80px; border-radius: 10px;">
+                <img src="images/sticker.png" style="width: 70px; height: 70px; object-fit: contain;">
                 <div class="menu-label">칭찬스티커</div>
             </div>
             <div class="menu-item" onclick="showSubPage('독서 기록')">
-                <img src="images/book.png" style="width: 100%; max-width: 80px; border-radius: 10px;">
+                <img src="images/book.png" style="width: 70px; height: 70px; object-fit: contain;">
                 <div class="menu-label">독서기록</div>
             </div>
             <div class="menu-item" onclick="showSubPage('일기 기록')">
-                <img src="images/diary.png" style="width: 100%; max-width: 80px; border-radius: 10px;">
+                <img src="images/diary.png" style="width: 70px; height: 70px; object-fit: contain;">
                 <div class="menu-label">일기기록</div>
             </div>
             <div class="menu-item" onclick="showSubPage('우리반 스티커')">
-                <img src="images/trophy.png" style="width: 100%; max-width: 80px; border-radius: 10px;">
+                <img src="images/trophy.png" style="width: 70px; height: 70px; object-fit: contain;">
                 <div class="menu-label">우리반스티커</div>
             </div>
         </div>
     </div>
 
-    <!-- 4. 하위 목록 섹션 (학생 명단 보여주는 곳) -->
+    <!-- 4. 목록 화면 섹션 -->
     <div id="sec-sub" class="section">
         <button class="back-btn" onclick="goBack()">← 뒤로가기</button>
-        <h3 id="sub-title" style="text-align: center; color: #2d3436;">메뉴 이름</h3>
-        <div id="student-display-list" class="scroll-list">
-            <!-- 자바스크립트가 여기에 학생 명단을 생성합니다 -->
-        </div>
+        <h3 id="sub-title" style="text-align: center; color: #2d3436; margin-bottom: 20px;">메뉴 이름</h3>
+        <div id="student-display-list" class="scroll-list"></div>
     </div>
 
-    <!-- 5. 상세 기록 섹션 (스티커 찍거나 일기 쓰는 곳) -->
+    <!-- 5. 상세 입력 섹션 -->
     <div id="sec-detail" class="section">
         <button class="back-btn" onclick="changeSection('sec-sub')">← 목록으로</button>
-        <h2 id="detail-student-name" style="text-align: center; color: #0984e3;">학생 이름</h2>
-        <div id="detail-interface">
-            <!-- 상세 UI가 여기에 생성됩니다 -->
-        </div>
+        <h2 id="detail-student-name" style="text-align: center; color: #0984e3; margin-bottom: 20px;">학생 이름</h2>
+        <div id="detail-interface"></div>
     </div>
-
 </div>
 
 <script>
-    /* 아래 스크립트 코드는 선생님이 기존에 잘 작성해주신 파이어베이스 로직을 그대로 유지합니다 */
+    /* 파이어베이스 및 앱 로직 (선생님 기존 코드 유지 및 최적화) */
     const firebaseConfig = {
         apiKey: "AIzaSyBKVYFPnLoBZ9bKjjE1SfJXBQKiV4fssj4",
         authDomain: "smart-class2-record.firebaseapp.com",
@@ -78,14 +128,17 @@
 
     firebase.initializeApp(firebaseConfig);
     const fs = firebase.firestore();
-
     let currentClassName = "";
     let currentRoster = [];
     let classData = {};
 
+    // 명부 입력칸 자동 생성
     const rosterDiv = document.getElementById('roster-inputs');
     for(let i=1; i<=30; i++) {
-        rosterDiv.innerHTML += `<div class="roster-row"><span class="num-box">${i}</span><input type="text" class="input-field" id="name-${i}" style="margin:2px 0;" placeholder="학생 이름"></div>`;
+        rosterDiv.innerHTML += `<div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+            <span style="font-size:12px; color:#636e72; width:20px;">${i}</span>
+            <input type="text" class="input-field" id="name-${i}" style="margin:0; padding:8px;" placeholder="이름">
+        </div>`;
     }
 
     async function handleLogin() {
@@ -97,7 +150,7 @@
         const docSnap = await docRef.get();
 
         if (!docSnap.exists) {
-            if(confirm(`'${className}' 학급이 없습니다. 새로 만드시겠습니까?`)) {
+            if(confirm(`'${className}' 학급을 새로 생성할까요?`)) {
                 classData = { password: pw, roster: [], classStickers: 0, rewardText: "보상을 입력하세요" };
                 await docRef.set(classData);
                 enterMain(className, []);
@@ -107,16 +160,14 @@
             if(data.password === pw) {
                 classData = data;
                 enterMain(className, data.roster);
-            } else {
-                alert("비밀번호가 틀립니다.");
-            }
+            } else { alert("비밀번호가 틀립니다."); }
         }
     }
 
     function enterMain(className, roster) {
         currentClassName = className;
         currentRoster = roster;
-        document.getElementById('welcome-msg').innerText = "✨ " + className;
+        document.getElementById('welcome-msg').innerText = "✨ " + className + " 반";
         changeSection(currentRoster.length === 0 ? 'sec-setup' : 'sec-main');
     }
 
@@ -131,6 +182,7 @@
                 });
             }
         }
+        if(currentRoster.length === 0) return alert("최소 한 명 이상의 학생 이름을 입력해주세요.");
         await saveDB();
         changeSection('sec-main');
     }
@@ -145,7 +197,6 @@
     }
 
     function showSubPage(title) {
-        // [수정] id="sub-title"에 제목을 넣고, sec-sub 화면을 보여줍니다.
         document.getElementById('sub-title').innerText = title;
         const listDiv = document.getElementById('student-display-list');
         listDiv.innerHTML = "";
@@ -156,8 +207,8 @@
             currentRoster.forEach((std, idx) => {
                 let summary = "";
                 if(title === '칭찬 스티커') summary = `⭐ ${std.stickers.filter(s => s).length}`;
-                if(title === '독서 기록') summary = `📖 ${std.readingCount}권`;
-                if(title === '일기 기록') summary = std.diaryDates.length > 0 ? `📅 ${std.diaryDates[std.diaryDates.length-1]}` : "기록 없음";
+                else if(title === '독서 기록') summary = `📖 ${std.readingCount}권`;
+                else if(title === '일기 기록') summary = std.diaryDates.length > 0 ? `📅 ${std.diaryDates[std.diaryDates.length-1]}` : "미작성";
 
                 listDiv.innerHTML += `
                     <div class="record-row" onclick="openDetail(${idx}, '${title}')">
@@ -171,7 +222,7 @@
 
     function openDetail(idx, title) {
         const std = currentRoster[idx];
-        document.getElementById('detail-student-name').innerText = `${std.name} (${title})`;
+        document.getElementById('detail-student-name').innerText = `${std.name} 학생`;
         const ui = document.getElementById('detail-interface');
         ui.innerHTML = "";
 
@@ -184,7 +235,7 @@
 
     function renderPersonalStickers(idx, container) {
         const std = currentRoster[idx];
-        container.innerHTML = `<p style="text-align:center;">현재 스티커: <b>${std.stickers.filter(s => s).length}</b> / 30</p><div class="sticker-grid" id="st-grid"></div>`;
+        container.innerHTML = `<p style="text-align:center; font-size:14px; margin-bottom:15px;">개인 스티커판 (누르면 체크)</p><div class="sticker-grid" id="st-grid"></div>`;
         const grid = document.getElementById('st-grid');
         std.stickers.forEach((on, sIdx) => {
             const cell = document.createElement('div');
@@ -202,7 +253,7 @@
     function renderReadingTool(idx, container) {
         const std = currentRoster[idx];
         container.innerHTML = `
-            <div class="reading-display">📖 총 ${std.readingCount}권 읽음</div>
+            <div class="reading-display">📖 현재 ${std.readingCount}권 읽음</div>
             <div style="display:flex; gap:10px;">
                 <button class="btn-blue" onclick="updateReading(${idx}, 1)">+ 1권 추가</button>
                 <button class="btn-blue" style="background:#e74c3c" onclick="updateReading(${idx}, -1)">- 1권 차감</button>
@@ -219,23 +270,20 @@
         const std = currentRoster[idx];
         container.innerHTML = `
             <div style="margin-bottom:15px; display:flex; gap:5px;">
-                <input type="text" id="diary-date-in" class="input-field" placeholder="날짜 입력 (예: 3/10)" style="flex:1;">
-                <button class="btn-blue" onclick="addDiaryDate(${idx})" style="width:80px;">추가</button>
+                <input type="text" id="diary-date-in" class="input-field" placeholder="기록 날짜 (예: 5/8)" style="flex:1;">
+                <button class="btn-blue" onclick="addDiaryDate(${idx})" style="width:70px;">추가</button>
             </div>
-            <div style="background:#fff; border:1px solid #dfe6e9; border-radius:10px; padding:10px;">
-                <div id="diary-grid" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:5px;"></div>
-            </div>
-            <p style="font-size:12px; color:#636e72; margin-top:10px; text-align:right;">총 ${std.diaryDates.length}회 기록됨</p>
+            <div id="diary-grid" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:5px;"></div>
+            <p style="font-size:12px; color:#636e72; margin-top:10px; text-align:center;">날짜를 누르면 삭제됩니다.</p>
         `;
-
         const grid = document.getElementById('diary-grid');
         for (let i = 0; i < 50; i++) {
             const cell = document.createElement('div');
-            cell.style.cssText = `aspect-ratio: 1.5 / 1; border: 1px solid #f1f2f6; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; background: ${std.diaryDates[i] ? '#e1f5fe' : '#fff'}; color: ${std.diaryDates[i] ? '#0288d1' : '#dfe6e9'}; font-weight: ${std.diaryDates[i] ? 'bold' : 'normal'};`;
+            cell.style.cssText = `aspect-ratio: 1.5/1; border: 1px solid #f1f2f6; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor:pointer; background: ${std.diaryDates[i] ? '#e1f5fe' : '#fff'}; color: ${std.diaryDates[i] ? '#0288d1' : '#dfe6e9'};`;
             cell.innerText = std.diaryDates[i] ? std.diaryDates[i] : (i + 1);
             if(std.diaryDates[i]) {
                 cell.onclick = async () => {
-                    if(confirm(`'${std.diaryDates[i]}' 기록을 삭제할까요?`)) {
+                    if(confirm("이 기록을 삭제할까요?")) {
                         std.diaryDates.splice(i, 1);
                         await saveDB();
                         renderDiaryTool(idx, container);
@@ -250,20 +298,18 @@
         const dateIn = document.getElementById('diary-date-in');
         const date = dateIn.value.trim();
         if(!date) return;
-        if(currentRoster[idx].diaryDates.length >= 50) return alert("최대 50회까지만 기록할 수 있습니다.");
         currentRoster[idx].diaryDates.push(date);
         await saveDB();
         renderDiaryTool(idx, document.getElementById('detail-interface'));
         dateIn.value = "";
-        dateIn.focus();
     }
 
     function renderClassStickerPage(container) {
         let score = classData.classStickers || 0;
         container.innerHTML = `
             <div class="reward-box">
-                <span style="font-weight:bold; color:#0984e3;">🏆 보상 기준 (수정 시 자동저장)</span>
-                <textarea id="reward-ta" class="reward-input" rows="3">${classData.rewardText || ""}</textarea>
+                <span style="font-weight:bold; color:#0984e3;">🏆 전체 보상 기준</span>
+                <textarea id="reward-ta" class="reward-input" rows="2" placeholder="보상을 입력하세요">${classData.rewardText || ""}</textarea>
             </div>
             <div class="class-goal-bar" id="goal-bar"></div>
             <div style="text-align:center;">
@@ -273,12 +319,10 @@
                     <button class="btn-blue" style="background:#e74c3c" onclick="updateClassScore(-1)">- 1점</button>
                 </div>
             </div>`;
-        
         document.getElementById('reward-ta').onblur = async (e) => {
             classData.rewardText = e.target.value;
             await saveDB();
         };
-
         const bar = document.getElementById('goal-bar');
         for(let i=1; i<=30; i++) {
             bar.innerHTML += `<div class="goal-cell ${i <= score ? 'filled' : ''}">${i%5==0?i:''}</div>`;
@@ -293,12 +337,10 @@
 
     function changeSection(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        const target = document.getElementById(id);
-        if(target) target.classList.add('active');
+        document.getElementById(id).classList.add('active');
         window.scrollTo(0, 0);
     }
-
     function goBack() { changeSection('sec-main'); }
 </script>
-
 </body>
+</html>
