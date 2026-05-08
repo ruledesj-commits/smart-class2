@@ -6,9 +6,25 @@
     <title>SMART 학급수첩 (Cloud)</title>
     <style>
         /* 스타일 부분은 선생님의 기존 예쁜 디자인과 동일합니다 */
-        body { font-family: 'Malgun Gothic', sans-serif; background: #f8f9fa; margin: 0; padding: 10px; display: flex; justify-content: center; }
-        .app-container { width: 100%; max-width: 450px; background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-height: 95vh; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
-        h1 { text-align: center; color: #2d3436; font-size: 22px; margin-bottom: 10px; }
+        body {
+    font-family: 'Malgun Gothic', sans-serif;
+    /* 기존의 연회색(#f8f9fa) 대신 아래의 부드러운 하늘색으로 변경 */
+    background: #e3f2fd; 
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+       .app-container {
+    width: 100%;
+    max-width: 500px;
+    background: #ffffff;
+    border-radius: 20px;
+    /* 그림자를 주어 배경 위로 살짝 뜬 느낌을 줍니다 */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); 
+    padding: 20px;
+    min-height: 90vh;
+}
         .btn-blue { width: 100%; padding: 12px; background: #0984e3; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         .input-field { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; }
         .section { display: none; }
