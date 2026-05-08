@@ -126,7 +126,7 @@
         const docRef = fs.collection("classes").doc(className);
         const docSnap = await docRef.get();
 
-        if (!docSnap.exists()) {
+        if (!docSnap.exists) {
             if(confirm(`'${className}' 학급이 없습니다. 새로 만드시겠습니까?`)) {
                 classData = { password: pw, roster: [], classStickers: 0, rewardText: "보상을 입력하세요" };
                 await docRef.set(classData);
