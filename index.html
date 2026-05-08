@@ -111,18 +111,34 @@
 </div>
 
     <!-- 4. 하위 목록 섹션 -->
-    <div id="sec-sub" class="section">
-        <button class="back-btn" onclick="goBack()">← 뒤로가기</button>
-        <h3 id="sub-title">메뉴 이름</h3>
-        <div id="student-display-list" class="scroll-list"></div>
-    </div>
+<!-- 3. 상세 페이지 섹션들 (교체된 부분) -->
 
-    <!-- 5. 상세 기록 섹션 -->
-    <div id="sec-detail" class="section">
-        <button class="back-btn" onclick="changeSection('sec-sub')">← 목록으로</button>
-        <h2 id="detail-student-name">학생 이름</h2>
-        <div id="detail-interface"></div>
-    </div>
+<!-- 칭찬 스티커 페이지 -->
+<div id="sec-sticker" class="section" style="display: none; text-align: center;">
+    <h3 style="margin-top: 20px;">🎁 우리 반 칭찬 스티커</h3>
+    <div id="sticker-list" class="scroll-list"></div>
+    <button class="btn-blue" onclick="showSubPage('main')" style="margin-top:20px; width: 80%;">메인으로 돌아가기</button>
+</div>
+
+<!-- 독서 기록 페이지 -->
+<div id="sec-book" class="section" style="display: none; text-align: center;">
+    <h3 style="margin-top: 20px;">📚 독서 기록장</h3>
+    <div id="book-list" class="scroll-list"></div>
+    <button class="btn-blue" onclick="showSubPage('main')" style="margin-top:20px; width: 80%;">메인으로 돌아가기</button>
+</div>
+
+<!-- 일기 기록 페이지 -->
+<div id="sec-diary" class="section" style="display: none; text-align: center;">
+    <h3 style="margin-top: 20px;">✍️ 오늘의 일기</h3>
+    <div id="diary-list" class="scroll-list"></div>
+    <button class="btn-blue" onclick="showSubPage('main')" style="margin-top:20px; width: 80%;">메인으로 돌아가기</button>
+</div>
+
+<!-- 우리반 스티커 페이지 -->
+<div id="sec-class" class="section" style="display: none; text-align: center;">
+    <h3 style="margin-top: 20px;">🏆 우리 반 스티커 판</h3>
+    <div id="class-list" class="scroll-list"></div>
+    <button class="btn-blue" onclick="showSubPage('main')" style="margin-top:20px; width: 80%;">메인으로 돌아가기</button>
 </div>
 
 
